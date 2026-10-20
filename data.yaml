@@ -1,0 +1,22 @@
+# YOLO pose training config - v2, for real-scale training (25+ subjects)
+#
+# Unlike the 4-photo practice round, at this scale you need a REAL train/val split -
+# using the same images for both training and testing gave misleadingly perfect
+# numbers before. Now:
+#   - images/train + labels/train = the photos the model learns from (~80%)
+#   - images/val + labels/val     = photos held back to test it honestly (~20%)
+#
+# With 50 photos: aim for roughly 40 in train/, 10 in val/. Don't put the same
+# photo in both folders.
+
+path: ../data
+train: images/train
+val: images/val
+
+# Number of classes (just "ear" - class 0)
+names:
+  0: ear
+
+# 8 acupoints: EarApex, Endocrine, ShenMen, SuperiorTriangularFossa, Heart,
+# Pancreas, Sympathetic, Kidney (order must match POINT_ORDER in prepare_yolo_data.py)
+kpt_shape: [8, 3]
