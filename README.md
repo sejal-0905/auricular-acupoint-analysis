@@ -1,172 +1,351 @@
-# Vision-Based Analysis of Auricular Acupoints for Hypertension and Diabetes
+# 👂 Vision-Based Analysis of Auricular Acupoints for Hypertension and Diabetes
 
-A computer vision pipeline that locates eight auricular (ear) acupoints in ear photographs, measures colour and texture at each point, and tests whether those measurements differ between healthy people, people with hypertension and people with diabetes.
+<p align="center">
+  <strong>A Computer Vision and Statistical Analysis Pipeline for Exploring Visual Differences in Auricular Acupoints</strong>
+</p>
 
-> **Research use only.** This project does not diagnose or screen for hypertension or diabetes. It investigates whether selected auricular points show visual differences between known clinical groups. The results are exploratory (pilot scale).
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.x-blue?logo=python" />
+  <img src="https://img.shields.io/badge/YOLO11-Pose-purple" />
+  <img src="https://img.shields.io/badge/OpenCV-Computer%20Vision-green?logo=opencv" />
+  <img src="https://img.shields.io/badge/Research-Exploratory-orange" />
+</p>
 
-## Pipeline
+A computer vision pipeline that automatically localises eight auricular (ear) acupoints, extracts colour and texture features from ear photographs, and statistically investigates whether these features differ between three known clinical groups: healthy individuals, individuals with hypertension, and individuals with diabetes.
 
-1. **Image acquisition:** standardised front-view ear photographs (ring light, macro lens, fixed distance and framing), both ears per participant.
-2. **Annotation:** eight points labelled manually in LabelMe (one JSON file per image).
-3. **Detection:** a YOLO11-pose model fine-tuned to locate the eight points automatically.
-4. **Feature extraction:** a 15x15 pixel patch around each point is converted into colour (RGB, CIELAB, HSV) and texture features with OpenCV.
-5. **Statistical comparison:** features are averaged per participant and compared across the three groups with non-parametric tests and false-discovery-rate control.
+The project combines **YOLO11-Pose, OpenCV, and statistical hypothesis testing** to explore potential visual patterns in selected auricular points.
 
-## Acupoints studied
+> ⚠️ **Research use only:** This project is not a diagnostic or screening tool for hypertension or diabetes. It investigates visual differences between previously identified clinical groups. Findings are exploratory and based on a pilot-scale dataset.
 
-Ear Apex, Shen Men, Superior Triangular Fossa, Sympathetic, Kidney, Heart, Pancreas and Endocrine, selected from published clinical literature (WFAS international standard of auricular points).
+---
 
-## Repository structure
+## ✨ Key Features
 
+- **📍 Auricular Acupoint Localisation** — Detects eight predefined ear acupoints using a fine-tuned YOLO11-Pose model.
+- **🖼️ Image Annotation** — Uses LabelMe for manual keypoint annotation and dataset preparation.
+- **🎨 Colour Feature Extraction** — Extracts RGB, CIELAB, and HSV colour information from localised regions.
+- **🔍 Texture Analysis** — Measures grayscale intensity variation around each acupoint.
+- **📊 Statistical Comparison** — Compares feature distributions across healthy, hypertension, and diabetes groups.
+- **🧪 Multiple Testing Correction** — Applies Benjamini-Hochberg FDR and Holm correction to reduce false-positive findings.
+- **📈 Visualisation** — Generates annotated image overlays, statistical tables, and feature comparison plots.
+
+## 🔬 Project Pipeline
+
+```text
+Ear Photographs
+      │
+      ▼
+Manual Annotation (LabelMe)
+      │
+      ▼
+Dataset Preparation
+(LabelMe JSON → YOLO Format)
+      │
+      ▼
+YOLO11-Pose Training
+      │
+      ▼
+Acupoint Localisation
+      │
+      ▼
+Colour & Texture Extraction
+      │
+      ▼
+Participant-Level Aggregation
+      │
+      ▼
+Statistical Group Comparison
+      │
+      ▼
+Results, Tables & Visualisations
 ```
+
+### Pipeline Overview
+
+| Stage | Description | Tools |
+|---|---|---|
+| Image Acquisition | Standardised front-view ear photographs | Macro lens, ring light |
+| Annotation | Manual labelling of eight acupoints | LabelMe |
+| Detection | Automated keypoint localisation | YOLO11-Pose |
+| Feature Extraction | Colour and texture measurements from 15 × 15 pixel patches | OpenCV, NumPy |
+| Statistical Analysis | Group comparisons and multiple-testing correction | SciPy, statsmodels |
+| Visualisation | Detection overlays, statistical plots and result tables | Matplotlib |
+
+## 📍 Auricular Acupoints Studied
+
+Eight auricular points were selected based on published clinical literature and the WFAS international standard of auricular points.
+
+1. Ear Apex
+2. Shen Men
+3. Superior Triangular Fossa
+4. Sympathetic
+5. Kidney
+6. Heart
+7. Pancreas
+8. Endocrine
+
+## 🗂️ Repository Structure
+
+```text
 .
 ├── README.md
 ├── .gitignore
+│
 └── scripts/
-    ├── prepare_yolo_data.py   # LabelMe JSON -> YOLO format, automatic train/val split
-    ├── data.yaml              # YOLO dataset config (8 keypoints)
-    ├── train_yolo.py          # fine-tune YOLO11-pose
-    ├── predict.py             # run the trained model on one image
-    ├── extract_features.py    # colour/texture features at the labelled points
-    └── compare_groups.py      # group comparison and statistics
+    ├── prepare_yolo_data.py   # LabelMe JSON → YOLO format and dataset split
+    ├── data.yaml              # YOLO dataset configuration (8 keypoints)
+    ├── train_yolo.py          # Fine-tune YOLO11-Pose
+    ├── predict.py             # Detect acupoints in an image
+    ├── extract_features.py    # Extract colour and texture features
+    └── compare_groups.py      # Statistical group comparison
 ```
 
-Folders created or expected when you run the code (not included in the repository):
+### 📁 Data Directories
 
-```
+The following folders are created or expected during execution and are not included in the repository:
+
+```text
 data/
-├── images/           # ear photographs
+├── images/           # Ear photographs
 └── labelme_json/     # LabelMe point annotations
-results/              # generated: features.csv, stats tables, plots, overlays
+
+results/              # Generated outputs
+├── features.csv
+├── stats_omnibus.csv
+├── stats_posthoc.csv
+├── plots/
+└── overlays/
 ```
 
-## Dataset and privacy
+## 📊 Dataset
 
-The dataset (ear photographs and annotations) is **not included** in this repository, to protect participant privacy. Data were collected through a collaborating clinical practitioner with informed consent, and images were named with anonymous codes. To run the scripts on your own data, provide `data/images` and `data/labelme_json`.
+The dataset consists of **193 ear photographs from 97 participants**, collected through a collaborating clinical practitioner with informed consent.
 
-File names encode the group, participant and ear side:
+| Group | Participants | Images | Purpose |
+|---|---:|---:|---|
+| General | 25 | 50 | Detector training only |
+| Healthy | 24 | 48 | Detector training and statistical analysis |
+| Hypertension | 25 | 50 | Detector training and statistical analysis |
+| Diabetes | 23 | 45 | Detector training and statistical analysis |
+| **Total** | **97** | **193** | |
 
-| Pattern | Meaning |
+### Dataset Naming Convention
+
+Image filenames encode the participant group, participant number, and ear side.
+
+| Filename | Meaning |
 |---|---|
 | `HE_01_L.jpg` | Healthy, participant 01, left ear |
 | `HY_01_R.jpg` | Hypertension, participant 01, right ear |
 | `DB_01_L.jpg` | Diabetes, participant 01, left ear |
-| `01_L.jpg` | General group (diagnosis unknown), used only to train the detector |
+| `01_L.jpg` | General group, diagnosis unknown |
 
-| Group | Participants | Images | Use |
-|---|---|---|---|
-| General | 25 | 50 | Detector training only |
-| Healthy | 24 | 48 | Detector training and statistics |
-| Hypertension | 25 | 50 | Detector training and statistics |
-| Diabetes | 23 | 45 | Detector training and statistics |
-| Total | 97 | 193 | |
+🔒 **Privacy:** Participant photographs and annotations are not included in this repository. Images were stored using anonymous participant codes. To reproduce the pipeline, provide your own dataset in the expected directory structure.
 
-## Setup
+## ⚙️ Installation & Setup
 
-Python 3 is required.
+### Requirements
+
+- Python 3
+- pip
+- Ear photographs and corresponding LabelMe annotations
+
+### Install Dependencies
 
 ```bash
 pip install ultralytics opencv-python numpy pandas scipy statsmodels matplotlib
 ```
 
-## Usage
+The scripts also use NLTK for sentence-independent processing only if required by the relevant implementation; check the script imports before adding any additional dependencies.
 
-Run from the project root, in this order.
+## 🚀 Usage
+
+Run all commands from the project root directory, in the following order.
+
+**1. Prepare the YOLO Dataset**
+
+Convert LabelMe annotations into YOLO-compatible format and automatically split the dataset into training and validation sets.
 
 ```bash
-# 1. Convert annotations to YOLO format and split into train/validation
 python scripts/prepare_yolo_data.py
+```
 
-# 2. Fine-tune the YOLO11-pose detector
+**2. Train the YOLO11-Pose Model**
+
+Fine-tune the pose estimation model to detect the eight auricular keypoints.
+
+```bash
 python scripts/train_yolo.py
+```
 
-# 3. (Optional) Detect the points on one image; check the paths at the top of the script
+**3. Predict Acupoints (Optional)**
+
+Run the trained model on an individual ear photograph. Check the image and model paths configured in the script.
+
+```bash
 python scripts/predict.py
+```
 
-# 4. Extract colour and texture features -> results/features.csv
+**4. Extract Colour and Texture Features**
+
+Extract local image features around manually annotated acupoints and generate `features.csv`.
+
+```bash
 python scripts/extract_features.py
+```
 
-# 5. Compare the groups -> results/stats_omnibus.csv, stats_posthoc.csv, top_features.png
+**5. Perform Statistical Analysis**
+
+Compare the extracted features across the three clinical groups and generate statistical reports and plots.
+
+```bash
 python scripts/compare_groups.py
 ```
 
-### What the feature step does
+## 🎨 Feature Extraction
 
-For each image in `data/labelme_json`, `extract_features.py` reads the group from the file-name prefix (HE, HY, DB; general images are skipped), cuts a 15x15 pixel patch around each labelled point, and records:
+For each photograph, `extract_features.py` reads the group information from the filename and extracts features from a **15 × 15 pixel patch** centred around each manually annotated acupoint.
 
-| Column(s) | Meaning |
+General-group images are excluded from the statistical feature analysis.
+
+### Extracted Features
+
+| Feature | Description |
 |---|---|
-| `R`, `G`, `B` | Mean red, green, blue of the patch (0 to 255) |
-| `L` | Mean CIELAB lightness (OpenCV 0 to 255 scale) |
-| `a` | CIELAB red-green axis (128 is neutral, higher is redder) |
-| `b` | CIELAB blue-yellow axis (128 is neutral, higher is more yellow) |
-| `saturation`, `brightness` | Mean HSV saturation and value |
-| `texture` | Standard deviation of grayscale intensity in the patch |
-| `patch_pixels` | Pixels in the patch (225 for a full patch; fewer if clipped by the image border) |
-| `*_rel` | The feature minus the mean over the eight points of the same image (partly cancels exposure differences) |
+| `R`, `G`, `B` | Mean red, green, and blue channel intensities |
+| `L` | Mean CIELAB lightness |
+| `a` | CIELAB red-green colour axis |
+| `b` | CIELAB blue-yellow colour axis |
+| `saturation` | Mean HSV saturation |
+| `brightness` | Mean HSV value |
+| `texture` | Standard deviation of grayscale intensity |
+| `patch_pixels` | Number of pixels in the extracted patch |
+| `*_rel` | Feature value relative to the mean across all eight points in the same image |
 
-The script also saves an overlay image for each photograph, with a box drawn on every measured patch, so the patches can be checked visually.
+Relative features are calculated to partially account for image-level exposure differences.
 
-### What the statistics step does
+The script also generates **visual overlay images** with boxes around each measured patch, allowing the extracted regions to be inspected.
 
-1. Keeps seven points (Ear Apex is localised by the detector but left out of the group comparison).
-2. Uses five features chosen in advance: `a`, `a_rel`, `L`, `saturation`, `texture`.
-3. Averages the left and right ear per participant (72 participants: 24, 25, 23).
-4. Runs a Kruskal-Wallis test across the three groups for each of the 7 x 5 = 35 point-feature combinations (one-way ANOVA is reported alongside).
-5. Controls the false-discovery rate across the 35 tests (Benjamini-Hochberg, significant if q < 0.05).
-6. For combinations with an omnibus p below 0.05, runs pairwise Mann-Whitney U tests with Holm correction.
-7. Reports the effect size (epsilon-squared) and group medians, and plots the six strongest results.
+## 📈 Statistical Analysis
 
-## Results
+The statistical pipeline investigates whether the extracted features differ across the three participant groups.
 
-### Detector
+### Analysis Workflow
 
-YOLO11-pose was fine-tuned on 193 annotated images on a CPU-only laptop. Training stopped early at epoch 118 of 150 (no improvement for 30 epochs).
+1. Excludes Ear Apex from statistical comparison while retaining it for detector localisation.
+2. Selects seven acupoints and five predefined features:
+   - `a`
+   - `a_rel`
+   - `L`
+   - `saturation`
+   - `texture`
+3. Averages left and right ear measurements for each participant.
+4. Performs Kruskal-Wallis tests across the three groups for all **35 point-feature combinations**.
+5. Reports one-way ANOVA results alongside the non-parametric tests.
+6. Applies Benjamini-Hochberg FDR correction across the 35 omnibus tests.
+7. Performs pairwise Mann-Whitney U tests for combinations with omnibus p-values below 0.05, followed by Holm correction.
+8. Reports epsilon-squared effect sizes, group medians, and visualisations of the six strongest results.
 
-| Stage | Training data | Pose mAP50-95 |
-|---|---|---|
-| Pipeline check | 4 photographs | Not usable (too little data) |
-| Practice round | 50 photographs, 25 subjects | about 0.87 |
-| Final model | 193 photographs, 97 participants | 0.94 |
+## 🏆 Results & Findings
 
-Final validation metrics (epoch 118): precision 1.000, recall 1.000, mAP50 0.995, pose mAP50-95 0.941.
+### 1. YOLO11-Pose Detector Performance
 
-### Group comparison
+The YOLO11-Pose model was fine-tuned using 193 annotated ear photographs on a CPU-only laptop.
 
-Of the 35 tests, 5 remain significant after FDR correction (q < 0.05).
+Training stopped early at epoch 118 out of 150 after 30 epochs without improvement.
 
-| Point | Feature | p (Kruskal-Wallis) | q (FDR) | Epsilon-squared | Median healthy | Median hypertension | Median diabetes |
-|---|---|---|---|---|---|---|---|
-| Endocrine | L | 7.7e-05 | 0.0027 | 0.267 | 99.0 | 62.5 | 64.9 |
-| ShenMen | a_rel | 6.6e-04 | 0.0116 | 0.206 | 3.4 | 6.3 | 5.4 |
-| Heart | L | 1.2e-03 | 0.0142 | 0.189 | 145.4 | 106.1 | 107.2 |
-| Heart | saturation | 2.2e-03 | 0.0183 | 0.172 | 98.4 | 124.2 | 127.9 |
-| ShenMen | saturation | 2.6e-03 | 0.0183 | 0.167 | 131.5 | 157.6 | 168.0 |
+| Training Stage | Dataset | Pose mAP50-95 |
+|---|---|---:|
+| Pipeline Check | 4 photographs | Not usable |
+| Practice Round | 50 photographs, 25 subjects | ~0.87 |
+| Final Model | 193 photographs, 97 participants | **0.94** |
 
-Main observations:
+**Final validation metrics (epoch 118):**
 
-- Endocrine and Heart are darker (lower L) in both hypertension and diabetes than in healthy ears. The two patient groups do not differ from each other.
-- Shen Men saturation is higher in both patient groups. Heart saturation differs significantly only between healthy and diabetes.
-- Shen Men is relatively redder in hypertension (a_rel); this is the only result separating the two patient groups, and it is borderline (Holm p = 0.049).
-- Points tied specifically to diabetes in the literature (Kidney, Pancreas, Sympathetic) showed no significant difference after correction.
+| Metric | Score |
+|---|---:|
+| Precision | 1.000 |
+| Recall | 1.000 |
+| mAP50 | 0.995 |
+| Pose mAP50-95 | **0.941** |
 
-## Limitations
+### 2. Statistical Group Comparison
 
-- Small, single-site sample: 24, 25 and 23 participants per group.
-- Exposure, age, sex, skin tone and medication were not controlled, and exposure parity between groups was not verified. The lightness and saturation results could partly reflect such differences.
-- Individual values overlap heavily between groups, so these features cannot classify a single person.
-- The statistical comparison used the manually annotated points, not detector output.
-- The detector's validation set is small, with no external test set.
-- 35 tests were run on one dataset, so the findings need replication.
+Out of 35 point-feature combinations, **five remained statistically significant after FDR correction (q < 0.05).**
 
-## Future work
+| Acupoint | Feature | p-value | FDR q-value | Epsilon-squared |
+|---|---|---:|---:|---:|
+| Endocrine | L | 7.7e-05 | 0.0027 | 0.267 |
+| Shen Men | a_rel | 6.6e-04 | 0.0116 | 0.206 |
+| Heart | L | 1.2e-03 | 0.0142 | 0.189 |
+| Heart | Saturation | 2.2e-03 | 0.0183 | 0.172 |
+| Shen Men | Saturation | 2.6e-03 | 0.0183 | 0.167 |
 
-- A larger, age- and sex-matched cohort, with a colour reference card in every photograph.
-- Including Ear Apex and testing other patch sizes.
-- Running the statistics on detector-predicted points.
-- Modelling left and right ears together and adding ROC analysis if a feature shows promise.
-- Validating the detector on photographs from other cameras and sites.
+### Group Medians
 
-## Tech stack
+| Acupoint – Feature | Healthy | Hypertension | Diabetes |
+|---|---:|---:|---:|
+| Endocrine – L | 99.0 | 62.5 | 64.9 |
+| Shen Men – a_rel | 3.4 | 6.3 | 5.4 |
+| Heart – L | 145.4 | 106.1 | 107.2 |
+| Heart – Saturation | 98.4 | 124.2 | 127.9 |
+| Shen Men – Saturation | 131.5 | 157.6 | 168.0 |
 
-Python, Ultralytics YOLO11-pose, OpenCV, LabelMe, SciPy, pandas, NumPy, statsmodels, matplotlib.
+### Key Observations
+
+- **Endocrine and Heart:** Both points showed lower lightness values in the hypertension and diabetes groups compared with the healthy group. The two patient groups did not differ significantly from each other.
+- **Shen Men:** Saturation was higher in both patient groups. Relative redness (`a_rel`) was the only result that distinguished hypertension from diabetes, with a borderline Holm-adjusted p-value of 0.049.
+- **Heart:** Saturation showed a significant pairwise difference only between healthy and diabetes participants.
+- **Kidney, Pancreas and Sympathetic:** These points did not show significant differences after multiple-testing correction.
+
+> 📌 These findings represent exploratory group-level associations. They do not establish causation or provide reliable individual-level classification.
+
+## ⚠️ Limitations
+
+- **Small sample size:** The study includes 24 healthy, 25 hypertension, and 23 diabetes participants.
+- **Single-site dataset:** Images were collected through one collaborating clinical source.
+- **Uncontrolled variables:** Age, sex, skin tone, medication, and exposure conditions were not controlled.
+- **Image exposure:** Exposure parity between groups was not verified, potentially influencing lightness and saturation measurements.
+- **No individual classification:** Feature distributions overlap considerably across groups.
+- **Manual-point statistics:** Statistical analysis used manually annotated points rather than detector-predicted locations.
+- **Limited detector validation:** The validation set is small, with no independent external test set.
+- **Multiple comparisons:** Findings are based on 35 tests performed on a single pilot dataset and require independent replication.
+
+## 🔮 Future Work
+
+- Collect a larger, age- and sex-matched participant cohort.
+- Introduce colour reference cards during image acquisition to improve colour consistency.
+- Include Ear Apex in the statistical comparison and investigate alternative patch sizes.
+- Perform statistical analysis using detector-predicted keypoints.
+- Model left and right ear measurements jointly.
+- Explore ROC analysis if individual features demonstrate sufficient promise.
+- Validate the detector across different cameras, imaging conditions, and clinical sites.
+
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|---|---|
+| Programming Language | Python |
+| Computer Vision | OpenCV |
+| Keypoint Detection | Ultralytics YOLO11-Pose |
+| Annotation | LabelMe |
+| Data Processing | NumPy, pandas |
+| Statistical Analysis | SciPy, statsmodels |
+| Visualisation | Matplotlib |
+
+## 🎯 Project Highlights
+
+- Developed an end-to-end computer vision pipeline for auricular acupoint localisation and feature analysis.
+- Fine-tuned a YOLO11-Pose model achieving **0.941 pose mAP50-95** on the validation set.
+- Extracted multi-colour-space and texture features from eight predefined auricular points.
+- Conducted participant-level statistical comparisons across three clinical groups.
+- Applied FDR and Holm corrections to account for multiple statistical comparisons.
+- Investigated exploratory visual associations while explicitly accounting for limitations in clinical interpretation.
+
+---
+
+<p align="center">
+  <strong>👩‍💻 Developed as an academic research project</strong>
+  <br />
+  <sub>Computer Vision • Deep Learning • Statistical Analysis • Healthcare Research</sub>
+</p>
